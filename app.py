@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
+import base64
 
 app = Flask(__name__)
 
@@ -7,15 +8,17 @@ app = Flask(__name__)
 def upload_file_to_adobe():
     try:
         adobe_url = request.json.get('adobe_url')
-        file_path = request.json.get('file_path')
+        file_base64 = request.json.get('file_base64')  # expect base64 content, not file_path
 
-        if not adobe_url or not file_path:
-            return jsonify({"error": "Missing 'adobe_url' or 'file_path'"}), 400
+        if not adobe_url or not file_base64:
+            return jsonify({"error": "Missing 'adobe_url' or 'file_base64'"}), 400
 
-        with open(file_path, "rb") as file_data:
-            headers = {"Content-Type": "application/pdf"}
-            response = requests.put(adobe_url, data=file_data, headers=headers)
-            response.raise_for_status()
+        # Decode base64 string to bytes
+        file_bytes = base64.b64decode(file_base64)
+
+        headers = {"Content-Type": "application/pdf"}
+        response = requests.put(adobe_url, data=file_bytes, headers=headers)
+        response.raise_for_status()
 
         return jsonify({"status": "success", "response_headers": dict(response.headers)})
 

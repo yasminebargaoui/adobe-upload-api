@@ -2,5 +2,10 @@ services:
   - type: web
     name: adobe-upload-api
     env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    plan: free
+    region: oregon
+    branch: master
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /
+    autoDeploy: true
